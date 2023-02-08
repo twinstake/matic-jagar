@@ -3,6 +3,7 @@ package targets
 import (
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 
 	client "github.com/influxdata/influxdb1-client/v2"
@@ -70,7 +71,11 @@ func CurrentEthBalance(ops types.HTTPOptions, cfg *config.Config, c client.Clien
 		}
 
 		balWithDenom := ethBalance + "ETH"
-		_ = db.WriteToInfluxDb(c, bp, "bor_eth_balance", map[string]string{}, map[string]interface{}{"balance": balWithDenom, "amount": ethBalance})
+		fEthBalance, err := strconv.ParseFloat(ethBalance, 32)
+		if err != nil {
+			log.Printf("error parsing float: %s", ethBalance)
+		}
+		_ = db.WriteToInfluxDb(c, bp, "bor_eth_balance", map[string]string{}, map[string]interface{}{"balance": balWithDenom, "amount": fEthBalance})
 		log.Printf("Eth Current Balance: %s", ethBalance)
 	} else {
 		log.Println("Got an empty balance response from bor eth rpc endpoint !")
